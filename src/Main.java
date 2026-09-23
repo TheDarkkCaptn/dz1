@@ -1,10 +1,7 @@
-import java.util.ArrayList;
 import java.util.List;
-import model.Administrator;
 import model.Customer;
 import model.SupportAgent;
 import model.Ticket;
-import model.User;
 import repository.TicketRepository;
 import service.ConsoleNotificationService;
 import service.NotificationService;
@@ -14,53 +11,52 @@ public class Main {
     public static void main(String[] args) {
         System.out.println("=== HELP DESK ===");
 
-        TicketRepository repository = new TicketRepository();
-        repository.add(new Ticket(
+        // 1. Клиент
+        Customer customer = new Customer(1, "Анна Петрова", "anna@mail.ru");
+
+        // 2. Специалист поддержки
+        SupportAgent agent = new SupportAgent(2, "Сергей Иванов", "sergey@helpdesk.ru");
+
+        // 3. Заявка
+        Ticket ticket = new Ticket(
                 1,
-                "Не работает интернет",
-                "После перезагрузки компьютера пропало подключение"
-        ));
-        repository.add(new Ticket(
-                2,
-                "Ошибка приложения",
-                "При запуске возникает ошибка"
-        ));
-        repository.add(new Ticket(
-                3,
-                "Не печатает принтер",
-                "Принтер не отвечает"
-        ));
+                "Не работает Wi-Fi",
+                "Ноутбук не подключается к беспроводной сети"
+        );
 
-        System.out.println("\nСписок заявок:");
-        for (Ticket ticket : repository.findAll()) {
-            System.out.println("#" + ticket.getId() + " " + ticket.getTitle()
-                    + " | " + ticket.getStatus());
-        }
+        System.out.println("Клиент: " + customer.getName());
+        System.out.println("Специалист: " + agent.getName());
 
-        System.out.println("\nПользователи и полиморфизм:");
-        List<User> users = new ArrayList<>();
-        users.add(new Customer(1, "Анна", "anna@mail.ru"));
-        users.add(new SupportAgent(2, "Сергей", "sergey@helpdesk.ru"));
-        users.add(new Administrator(3, "Олег", "admin@helpdesk.ru"));
+        // 4. Начальный статус
+        System.out.println("Заявка #" + ticket.getId() + ": "
+                + ticket.getTitle() + " | " + ticket.getStatus());
 
-        for (User user : users) {
-            user.performAction();
-        }
-
-        System.out.println("\nРабота с заявкой через TicketService:");
+        // Сервис уведомлений и сервис заявок
         NotificationService notificationService = new ConsoleNotificationService();
         TicketService ticketService = new TicketService(notificationService);
 
-        Ticket ticket = repository.findAll().get(0);
+        // 5. В работу
         ticketService.startTicket(ticket);
-        ticket.resolve();
-        ticket.close();
+        System.out.println("Статус: " + ticket.getStatus());
 
-        System.out.println("Статус заявки #" + ticket.getId() + ": " + ticket.getStatus());
+        // 6. Решена
+        ticketService.resolveTicket(ticket);
+        System.out.println("Статус: " + ticket.getStatus());
 
-        System.out.println("\nПроверка запрещённых переходов:");
-        Ticket another = repository.findAll().get(1);
-        another.resolve();
-        another.close();
+        // 7. Закрыта
+        ticketService.closeTicket(ticket);
+        System.out.println("Статус: " + ticket.getStatus());
+
+        // 9. В репозиторий
+        TicketRepository repository = new TicketRepository();
+        repository.add(ticket);
+
+        // 10. Полный список
+        System.out.println("\nВсе заявки:");
+        List<Ticket> all = repository.findAll();
+        for (Ticket t : all) {
+            System.out.println("#" + t.getId() + " " + t.getTitle()
+                    + " | " + t.getStatus());
+        }
     }
 }
