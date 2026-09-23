@@ -11,17 +11,9 @@ public abstract class User {
         this.email = email;
     }
 
-    public long getId() {
-        return id;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public String getEmail() {
-        return email;
-    }
+    public long getId() { return id; }
+    public String getName() { return name; }
+    public String getEmail() { return email; }
 
     public abstract void performAction();
 }
